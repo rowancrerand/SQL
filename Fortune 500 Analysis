@@ -1,0 +1,94 @@
+# This analysis utilized the following Fortune 500 dataset.
+
+CREATE TABLE fortune_companies (
+    company_id INTEGER PRIMARY KEY,
+    company_name TEXT,
+    industry TEXT,
+    revenue REAL,
+    employees INTEGER,
+    healthcare_benefits BIT,
+    paid_time_off_days INTEGER,
+    maternity_leave_weeks INTEGER,
+    avg_employee_tenure REAL
+);
+
+INSERT INTO fortune_companies (company_name, industry, revenue, employees, healthcare_benefits, paid_time_off_days, maternity_leave_weeks, avg_employee_tenure)
+VALUES
+    ('Apple Inc.', 'Technology', 365.7, 147000, 1, 20, 12, 4.5),
+    ('Walmart Inc.', 'Retail', 523.96, 2200000, 1, 15, 8, 6.2),
+    ('Exxon Mobil Corporation', 'Energy', 265.01, 72000, 0, 18, 6, 7.8),
+    ('Amazon.com Inc.', 'Technology', 386.06, 1370000, 1, 22, 14, 5.1),
+    ('JPMorgan Chase & Co.', 'Financials', 160.1, 255998, 1, 21, 12, 6.9),
+    ('Verizon Communications Inc.', 'Telecommunications', 131.88, 132600, 0, 15, 6, 5.5),
+    ('Company A', 'Retail', 235.4, 20000, 1, 18, 10, 5.8),
+    ('Company B', 'Healthcare', 400.7, 23000, 1, 22, 13, 5.7),
+    ('Company C', 'Manufacturing', 300.2, 20000, 1, 18, 10, 5.8),
+    ('Company D', 'Healthcare', 150.5, 35000, 1, 20, 12, 6.5),
+    ('Company E', 'Finance', 280.7, 18000, 0, 14, 8, 4.2),
+    ('Company F', 'Technology', 420.1, 25000, 1, 22, 14, 7.1),
+    ('Company G', 'Retail', 190.8, 15000, 1, 16, 9, 5.3),
+    ('Company H', 'Energy', 280.5, 22000, 0, 15, 8, 6.8),
+    ('Company I', 'Telecommunications', 110.3, 18000, 1, 19, 11, 4.9),
+    ('Company J', 'Manufacturing', 390.6, 27000, 1, 21, 13, 6.2),
+    ('Company K', 'Healthcare', 180.2, 32000, 1, 17, 9, 7.4),
+    ('Company L', 'Finance', 230.4, 19000, 0, 13, 7, 5.6),
+    ('Company M', 'Technology', 340.9, 28000, 1, 23, 15, 6.9),
+    ('Company N', 'Retail', 200.6, 16000, 1, 15, 8, 4.7),
+    ('Company O', 'Energy', 260.2, 24000, 0, 14, 7, 6.1),
+    ('Company P', 'Telecommunications', 130.5, 21000, 1, 20, 12, 5.3),
+    ('Company Q', 'Manufacturing', 360.0, 29000, 1, 22, 14, 7.8),
+    ('Company R', 'Technology', 400.7, 23000, 1, 22, 13, 5.7),
+    ('Company S', 'Retail', 210.8, 16000, 0, 16, 9, 4.9),
+    ('Company T', 'Energy', 290.5, 22000, 1, 15, 8, 7.2),
+    ('Company U', 'Telecommunications', 140.3, 19000, 1, 20, 12, 6.1),
+    ('Company V', 'Manufacturing', 350.6, 28000, 1, 22, 14, 5.4),
+    ('Company W', 'Healthcare', 160.2, 33000, 0, 18, 10, 4.8),
+    ('Company X', 'Finance', 240.4, 20000, 1, 13, 7, 7.1),
+    ('Company Y', 'Technology', 320.9, 27000, 1, 23, 15, 5.6),
+    ('Company Z', 'Retail', 180.6, 14000, 0, 14, 8, 6.3),
+    ('Company AA', 'Energy', 240.2, 26000, 1, 17, 9, 6.5),
+    ('Company BB', 'Telecommunications', 120.5, 21000, 0, 19, 11, 4.5),
+    ('Company CC', 'Manufacturing', 380.0, 30000, 1, 21, 13, 7.3),
+    ('Company DD', 'Healthcare', 170.2, 32000, 1, 17, 9, 5.8),
+    ('Company EE', 'Finance', 250.4, 19000, 0, 12, 6, 6.4),
+    ('Company FF', 'Technology', 300.9, 25000, 1, 24, 16, 6.9),
+    ('Company GG', 'Retail', 190.6, 17000, 0, 13, 7, 5.2),
+    ('Company HH', 'Energy', 280.2, 23000, 1, 16, 9, 6.8),
+    ('Company II', 'Telecommunications', 110.5, 20000, 1, 21, 12, 4.9),
+    ('Company JJ', 'Manufacturing', 370.0, 31000, 1, 20, 12, 7.6),
+    ('Company KK', 'Healthcare', 150.2, 34000, 0, 16, 8, 5.3);
+
+# Analysis:
+
+## Do companies that offer 12 weeks maternity have a higher average tenure?
+SELECT ROUND(AVG(avg_employee_tenure),2) AS avg_tenure_maternity
+, CASE WHEN maternity_leave_weeks >= 12 THEN '1'
+ELSE '0'
+END AS fmla_twelve_weeks
+FROM fortune_companies
+GROUP BY fmla_twelve_weeks;
+
+## Which companies have healthcare benefits and more than average paid time off?
+SELECT company_name, healthcare_benefits, paid_time_off_days
+FROM fortune_companies
+WHERE healthcare_benefits = 1
+AND paid_time_off_days > (SELECT AVG(paid_time_off_days) 
+FROM fortune_companies);
+
+## Which companies produced the most revenue for their industry?
+SELECT company_name, industry, revenue
+FROM fortune_companies
+GROUP BY industry
+HAVING MAX(revenue);
+
+## How many employees work in each industry?
+SELECT industry, SUM(employees)
+FROM fortune_companies
+GROUP BY industry
+ORDER BY SUM(employees) desc;
+
+## Which companies have the highest revenue to employee ratio?
+SELECT company_name, revenue, employees
+, ROUND(revenue*1000000/employees, 0) AS revenue_per_employee
+FROM fortune_companies
+ORDER BY revenue_per_employee desc;
